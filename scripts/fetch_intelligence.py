@@ -13,9 +13,9 @@ import json
 import sys
 import time
 import urllib.parse
-import urllib.request
 from datetime import datetime, timedelta
-from pathlib import Path
+
+import requests
 
 
 GDELT_BASE = "https://api.gdeltproject.org/api/v2/doc/doc"
@@ -26,21 +26,27 @@ FRANKFURTER_BASE = "https://api.frankfurter.app"
 
 def _get(url: str, timeout: int = 15) -> dict:
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "geopolitical-analyst/2.0"})
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            return json.loads(r.read().decode())
+        response = requests.get(
+            url,
+            headers={"User-Agent": "geopolitical-analyst/2.0"},
+            timeout=timeout,
+        )
+        response.raise_for_status()
+        return response.json()
     except Exception as e:
         return {"error": str(e), "url": url}
 
 
 def _post(url: str, payload: dict, timeout: int = 15) -> dict:
     try:
-        data = json.dumps(payload).encode()
-        req = urllib.request.Request(url, data=data, method="POST",
-                                      headers={"Content-Type": "application/json",
-                                               "User-Agent": "geopolitical-analyst/2.0"})
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            return json.loads(r.read().decode())
+        response = requests.post(
+            url,
+            json=payload,
+            headers={"User-Agent": "geopolitical-analyst/2.0"},
+            timeout=timeout,
+        )
+        response.raise_for_status()
+        return response.json()
     except Exception as e:
         return {"error": str(e), "url": url}
 

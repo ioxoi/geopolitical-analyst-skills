@@ -92,8 +92,12 @@ class UnifiedGeopoliticalAnalyzer:
         """Get REAL-TIME events from LiveNewsMap and WarStrikes"""
         logger.info("Ingesting real-time events (news + military incidents)...")
         
-        from livenewsmap_scraper import get_livenewsmap_events
-        from warstrikes_scraper import get_warstrikes_incidents
+        try:
+            from .livenewsmap_scraper import get_livenewsmap_events
+            from .warstrikes_scraper import get_warstrikes_incidents
+        except ImportError:
+            from livenewsmap_scraper import get_livenewsmap_events
+            from warstrikes_scraper import get_warstrikes_incidents
         
         events = {
             'news_events': self._safe_scrape(get_livenewsmap_events),
