@@ -258,10 +258,6 @@ class ACLEDFetcher:
             if not data:
                 return {"source": "ACLED", "error": "Failed to fetch after retries", "events": []}
             events = data.get("data", [])
-            response.raise_for_status()
-            
-            data = response.json()
-            events = data.get("data", [])
             
             return {
                 "source": "ACLED",
@@ -319,13 +315,14 @@ class ReliefWebFetcher:
         try:
             date_from = (datetime.utcnow() - timedelta(days=days_back)).strftime("%Y-%m-%d")
             
-            # Build filter query
-            filters = f'filter[operators][0][name]=country&filter[operators][0][value][name]={country}&filter[operators][1][name]=date&filter[operators][1][value]=>{date_from}'
-            
             params = {
                 "appname": "geopolitical-analyst",
                 "limit": limit,
-                "sort": ["date:desc"]
+                "sort[]": "date:desc",
+                "filter[conditions][0][field]": "country.name",
+                "filter[conditions][0][value]": country,
+                "filter[conditions][1][field]": "date.created",
+                "filter[conditions][1][value][from]": date_from
             }
             
             response = requests.get(ReliefWebFetcher.BASE_URL, params=params, timeout=30)
